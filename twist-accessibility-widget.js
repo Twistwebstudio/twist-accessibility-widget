@@ -95,7 +95,7 @@
    * -------------------------------------------------------------- */
   var css = "" +
   "#twa-root, #twa-root *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}" +
-  "#twa-root{position:fixed;z-index:2147483000;line-height:1.4;}" +
+  "#twa-root{position:fixed !important;z-index:2147483000 !important;line-height:1.4;top:auto;bottom:auto;left:auto;right:auto;}" +
   "#twa-root.twa-pos-bottom-right{bottom:20px;right:20px;}" +
   "#twa-root.twa-pos-bottom-left{bottom:20px;left:20px;}" +
   "#twa-root.twa-pos-top-right{top:20px;right:20px;}" +
@@ -245,11 +245,18 @@
 
   function mount() {
     if (root.isConnected) return;
-    document.body.appendChild(root);
+    // Attach to <html> rather than <body>. Some site builders (Squarespace's
+    // Fluid Engine and similar parallax/animation systems included) apply a
+    // CSS transform to <body> or a top-level wrapper, which silently turns
+    // any position:fixed descendant into something fixed relative to THAT
+    // element instead of the viewport - the button can end up scrolled out
+    // of view or stuck in the wrong spot with no console error at all.
+    // Attaching as a sibling of <body> instead of inside it sidesteps that.
+    document.documentElement.appendChild(root);
     var guide = document.createElement("div");
     guide.id = "twa-reading-guide";
     guide.setAttribute("aria-hidden", "true");
-    document.body.appendChild(guide);
+    document.documentElement.appendChild(guide);
     wireEvents();
     applyAllSettings();
   }
